@@ -516,15 +516,30 @@ function openModal(id){if(id==='mPick')renderPick();document.getElementById(id).
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
 
+/* ===== persistence (記住使用者的釘選與設定) ===== */
+function saveState(){try{localStorage.setItem('tide_state',JSON.stringify({color:S.color,range:S.range,trail:S.trail,labels:S.labels,kmode:S.kmode,pinned:[...S.pinned],hidden:[...S.hidden]}));}catch(e){}}
+function loadState(){try{var j=JSON.parse(localStorage.getItem('tide_state'));if(!j)return;
+  if(j.color)S.color=j.color;if(j.range)S.range=j.range;
+  if(typeof j.trail==='number')S.trail=j.trail;if(typeof j.labels==='boolean')S.labels=j.labels;
+  if(j.kmode)S.kmode=j.kmode;
+  if(Array.isArray(j.pinned))S.pinned=new Set(j.pinned);
+  if(Array.isArray(j.hidden))S.hidden=new Set(j.hidden);}catch(e){}}
+
 /* ===== init ===== */
-function init(){SECID={};DATA.sectors.forEach((s,i)=>{SECID[s.sector]=i;});computeDomain();buildMap();renderToggles();
-  // default pin top 3 by |20d cum|
-  [...DATA.sectors].sort((a,b)=>Math.abs(cum20(b.series,LAST()))-Math.abs(cum20(a.series,LAST()))).slice(0,3).forEach(s=>S.pinned.add(s.sector));
-  const ws=winStart(),sc=document.getElementById('scrub');sc.min=ws;sc.max=LAST();
-  document.getElementById('tlStart').textContent=mmdd(DATA.dates[ws]);document.getElementById('tlEnd').textContent=mmdd(DATA.dates[LAST()]);
+function init(){
+  loadState();
+  SECID={};DATA.sectors.forEach((s,i)=>{SECID[s.sector]=i;});
+  computeDomain();buildMap();
+  // 僅在沒有已儲存的釘選時，預設釘選近20日資金量前三大
+  if(S.pinned.size===0)[...DATA.sectors].sort((a,b)=>Math.abs(cum20(b.series,LAST()))-Math.abs(cum20(a.series,LAST()))).slice(0,3).forEach(s=>S.pinned.add(s.sector));
+  renderToggles();
   document.getElementById('searchIn').addEventListener('input',e=>{S.search=e.target.value.trim();updateMap();});
-  sc.addEventListener('input',e=>{if(S.playing)togglePlay();setPos(+e.target.value);});
-  renderKside();setPos(LAST());}
+  document.getElementById('scrub').addEventListener('input',e=>{if(S.playing)togglePlay();setPos(+e.target.value);});
+  setColor(S.color);setTrail(S.trail);setLabels(S.labels);  // 還原設定並同步按鈕狀態
+  setRange(S.range);                                        // 設定時間軸範圍並繪製
+  window.addEventListener('beforeunload',saveState);
+  setInterval(saveState,2000);
+}
 function updatedLabel(){var e=document.getElementById('updLbl');if(e&&DATA&&DATA.updated){var d=DATA.updated;e.textContent='資料：'+d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8);}}
 function applyData(d){DATA=d;SECID={};DATA.sectors.forEach(function(s,i){SECID[s.sector]=i;});computeDomain();buildMap();renderToggles();renderKside();setRange(S.range);updatedLabel();}
 function boot(){fetch('data.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){DATA=d;}).catch(function(){}).then(function(){init();updatedLabel();});}

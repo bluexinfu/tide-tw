@@ -53,16 +53,26 @@ def num(s):
     try: return float(s)
     except: return 0.0
 
-def build_stock_sector(date):
-    """以最新交易日逐產業查 T86，建立 股票代號 -> 產業 對照。"""
+def build_stock_sector(dates):
+    """逐產業查 T86 建立 股票代號 -> 產業 對照。
+    為避免「最新一日盤後資料尚未完整」而漏掉某些產業，會依序嘗試多個近日，
+    把仍空缺的產業用前一日補齊（最新日優先，setdefault 保留最新分類）。
+    dates: 近期交易日字串清單（最新在前）。"""
     m = {}
-    for code, name in SECTORS.items():
-        d = fetch(T86_URL.format(d=date, t=code))
-        time.sleep(0.6)
-        if not d or d.get("stat") != "OK":
-            continue
-        for row in d.get("data", []):
-            m[row[0].strip()] = name
+    filled = set()                       # 已成功取得資料的產業
+    for ds in dates:
+        if len(filled) >= len(SECTORS):
+            break
+        for code, name in SECTORS.items():
+            if name in filled:
+                continue                 # 此產業較新一日已補齊，跳過
+            d = fetch(T86_URL.format(d=ds, t=code))
+            time.sleep(0.5)
+            if not d or d.get("stat") != "OK" or not d.get("data"):
+                continue
+            filled.add(name)
+            for row in d["data"]:
+                m.setdefault(row[0].strip(), name)
     return m
 
 def parse_mi(mi):
@@ -100,8 +110,15 @@ def latest_trading_day():
 def main():
     last = latest_trading_day()
     print("最新交易日:", last, file=sys.stderr)
-    stock_sector = build_stock_sector(last.strftime("%Y%m%d"))
-    print("對應股票數:", len(stock_sector), file=sys.stderr)
+    # 近期數個交易日(最新在前)供建立對照表，缺漏產業自動往前補齊
+    cand, dd = [], last
+    while len(cand) < 8:
+        if dd.weekday() < 5:
+            cand.append(dd.strftime("%Y%m%d"))
+        dd -= datetime.timedelta(days=1)
+    stock_sector = build_stock_sector(cand)
+    print("對應股票數:", len(stock_sector),
+          "| 產業數:", len(set(stock_sector.values())), file=sys.stderr)
 
     days = []                 # [{date, sv, ix, oh}]
     d = last

@@ -10,8 +10,7 @@
 .
 ├── index.html                  # 主程式（單檔前端，載入 data.json）
 ├── data.json                   # 資料快照（由 Actions 每日自動更新）
-├── scripts/
-│   └── build_data.py           # 抓取＋計算腳本（純 Python 標準庫，無相依）
+├── build_data.py               # 抓取＋計算腳本（純 Python 標準庫，無相依）
 └── .github/workflows/
     └── update.yml              # 每交易日收盤後自動更新 data.json
 ```
@@ -51,8 +50,8 @@ python3 -m http.server 8000
 ## 手動更新資料
 
 ```bash
-python3 scripts/build_data.py        # 產生最新 data.json（預設抓約 75 個交易日）
-NDAYS=120 python3 scripts/build_data.py   # 想拉更長歷史可調 NDAYS
+python3 build_data.py        # 產生最新 data.json（預設抓約 75 個交易日）
+NDAYS=120 python3 build_data.py   # 想拉更長歷史可調 NDAYS
 ```
 
 ## 指標說明
