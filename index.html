@@ -279,6 +279,7 @@ table.rank{width:100%;border-collapse:collapse;font-size:.88em}
       <div class="search">🔍<input id="searchIn" placeholder="搜尋板塊…"></div>
       <span id="updLbl" class="sub" style="align-self:center"></span>
       <button class="iconbtn" id="refreshBtn" title="重新整理資料" onclick="reload()">🔄</button>
+      <button class="iconbtn" title="完整新手指南" onclick="openModal('mGuide')">📖 完整新手指南</button>
       <button class="iconbtn" title="設定" onclick="openModal('mSet')">⚙ 設定</button>
     </div>
   </div>
@@ -288,14 +289,6 @@ table.rank{width:100%;border-collapse:collapse;font-size:.88em}
   <div class="main">
     <div class="sidebar">
       <div class="qmap" id="qmap"></div>
-      <div class="sideguide">
-        <h5>📖 怎麼看這張圖</h5>
-        <div class="row"><span class="ax">橫軸→</span> 近5日資金多寡：<span style="color:var(--in)">右＝買進</span>、<span style="color:var(--out)">左＝賣出</span>。</div>
-        <div class="row"><span class="ax">縱軸↑</span> 資金<b>力道的變化</b>：上＝加速、下＝放緩。<b>不是方向</b>，往下只是力氣變小，<b>不等於賣出</b>。</div>
-        <div class="row"><span class="ax">圈圈</span> 大小＝近20日資金量；顏色＝近5日方向。</div>
-        <div class="row">泡泡多沿<b>順時針</b>繞：漲潮→輪動→退潮→觀望，看出板塊在循環裡的位置。</div>
-        <button class="gbtn" onclick="openModal('mGuide')">完整新手指南 ›</button>
-      </div>
     </div>
 
     <div class="center">
