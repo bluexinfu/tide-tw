@@ -249,8 +249,8 @@ table.rank{width:100%;border-collapse:collapse;font-size:.88em}
             <br><b>四象限</b><br>
             ⭐ <b>漲潮</b>（右上）：流入且加速，最強<br>
             <b>輪動</b>（右下）：仍在流入，但力道放緩<br>
-            <b>退潮</b>（左下）：流出且持續轉弱<br>
-            <b>觀望</b>（左上）：流出趨緩、資金沉寂<br>
+            <b>退潮</b>（左下）：流出加速，越流越多<br>
+            <b>觀望</b>（左上）：流出趨緩，可能回穩<br>
             <span class="ex">例：某板塊前一週日均買 +15 億，這週降到 +10 億 → 仍是淨買（在右邊），但加速度 −5（在下面）＝「流入但放緩」。減速 ≠ 倒車。</span>
           </div></span>
           <div class="hint" id="hint">點泡泡可釘選到右側K線；按 ▶ 播放看輪動，白線會在K線上同步移動</div>
@@ -389,9 +389,9 @@ function staticLayer(){let g='';const bx=sx(0),by=sy(0);
     g+=`<line class="${m===0?'axis-zero':'axis-line'}" x1="${M.l}" y1="${Y}" x2="${W-M.r}" y2="${Y}"/>`;
     g+=`<text class="axis-txt" font-size="${AX}" x="${M.l-8}" y="${Y+AX*0.35}" text-anchor="end">${m>0?'+':''}${m}</text>`;});
   g+=`<text class="quad-txt" font-size="${QD}" x="${W-M.r-4}" y="${M.t+qTop}" text-anchor="end" fill="#e06a3c">⭐ 加速流入（漲潮）</text>`;
-  g+=`<text class="quad-txt" font-size="${QD}" x="${M.l+6}" y="${M.t+qTop}" fill="#9aa69c">加速流出</text>`;
+  g+=`<text class="quad-txt" font-size="${QD}" x="${M.l+6}" y="${M.t+qTop}" fill="#9aa69c">流出趨緩（觀望）</text>`;
   g+=`<text class="quad-txt" font-size="${QD}" x="${W-M.r-4}" y="${H-M.b-qBot}" text-anchor="end" fill="#caa84a">流入但放緩（輪動）</text>`;
-  g+=`<text class="quad-txt" font-size="${QD}" x="${M.l+6}" y="${H-M.b-qBot}" fill="#27a978">低迷沉寂（退潮）</text>`;
+  g+=`<text class="quad-txt" font-size="${QD}" x="${M.l+6}" y="${H-M.b-qBot}" fill="#27a978">流出加速（退潮）</text>`;
   g+=`<text class="axis-txt" x="${(M.l+W-M.r)/2}" y="${H-(mob?16:6)}" text-anchor="middle" font-size="${TT}">← 資金流出　近5日淨買超（億）　資金流入 →</text>`;
   g+=`<text class="axis-txt" transform="translate(${mob?22:16},${(M.t+H-M.b)/2}) rotate(-90)" text-anchor="middle" font-size="${TT}">資金加速度（億/天）</text>`;
   return g;}
@@ -439,7 +439,7 @@ function updateSummary(){const i=S.cur,snap=snapshot(i).filter(s=>!S.hidden.has(
   document.getElementById('sIn').textContent=snap.filter(s=>s.x>0).length;
   document.getElementById('sOut').textContent=snap.filter(s=>s.x<0).length;
   const c={chao:0,lun:0,guan:0,tui:0};snap.forEach(s=>c[s.q]++);
-  const defs=[['chao','漲潮','資金加速流入'],['lun','輪動','流入但放緩'],['guan','觀望','資金沉寂'],['tui','退潮','資金流出']];
+  const defs=[['chao','漲潮','加速流入'],['lun','輪動','流入但放緩'],['guan','觀望','流出趨緩'],['tui','退潮','流出加速']];
   document.getElementById('sidebar').innerHTML=defs.map(([k,t,dd])=>
     `<div class="qcard ${k} ${S.qfilter===k?'active':''}" onclick="filterQuad('${k}')"><div class="t">${t}</div><div class="n">${c[k]}</div><div class="d">${dd}</div></div>`).join('');}
 
