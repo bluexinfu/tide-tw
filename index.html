@@ -420,9 +420,11 @@ function updateMapAt(pos){const qf=S.qfilter,f=Math.floor(pos);
     n.dot.setAttribute('fill',c.f);n.dot.setAttribute('fill-opacity','0.85');n.dot.setAttribute('stroke',c.s);n.dot.setAttribute('stroke-width','1.6');
     const star=(q==='chao'&&m.x>20)?' ⭐':'';
     const mob=isMobile();
+    // 手機為避免中央小板塊標籤重疊：只標示已釘選、明顯流入/流出、或泡泡較大者
+    const showLab=S.labels && (!mob || S.pinned.has(sec.sector) || Math.abs(m.x)>=15 || r>=34);
     n.lab.setAttribute('x',X);n.lab.setAttribute('y',mob?Y+r*0.32:Y-1);
     n.lab.setAttribute('font-size',mob?Math.max(21,r*0.5):Math.max(9,r*0.4));
-    n.lab.textContent=S.labels?sec.sector+star:'';
+    n.lab.textContent=showLab?sec.sector+star:'';
     n.val.setAttribute('x',X);n.val.setAttribute('y',Y+r*0.46+4);n.val.setAttribute('font-size',Math.max(8,r*0.32));
     n.val.textContent=(S.labels&&!mob)?fmt(m.x):'';   // 手機改用點按看數值，減少擁擠
     n.g.classList.toggle('pinned',S.pinned.has(sec.sector));
