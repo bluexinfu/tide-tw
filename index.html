@@ -63,6 +63,17 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .tabs button{background:none;border:none;color:var(--muted);padding:6px 16px;border-radius:8px;font-size:.92em;transition:.15s}
 .tabs button.on{background:var(--panel2);color:var(--txt);font-weight:700}
 .hint{font-size:.78em;color:var(--muted2)}
+.cright{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.infohelp{position:relative;color:var(--accent);font-size:.8em;cursor:help;white-space:nowrap;
+  border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:var(--panel);user-select:none}
+.infohelp:hover,.infohelp:focus{border-color:var(--accent);outline:none}
+.infopop{position:absolute;top:135%;right:0;width:340px;max-width:78vw;background:rgba(7,15,11,.98);
+  border:1px solid var(--line);border-radius:12px;padding:14px 15px;box-shadow:var(--shadow);z-index:30;
+  display:none;white-space:normal;color:var(--txt);font-size:13px;line-height:1.75;text-align:left;font-weight:400}
+.infohelp:hover .infopop,.infohelp:focus .infopop,.infopop:hover{display:block}
+.infopop h5{margin:0 0 6px;font-size:13px;color:var(--accent);font-weight:700}
+.infopop b{color:#fff} .infopop .pos{color:var(--in);font-weight:700} .infopop .neg{color:var(--out);font-weight:700}
+.infopop .ex{color:var(--muted);display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 .stage{flex:1;position:relative;min-height:0}
 svg.chart{display:block;width:100%;height:100%}
 .axis-line{stroke:var(--line);stroke-width:1}
@@ -182,7 +193,20 @@ table.rank{width:100%;border-collapse:collapse;font-size:.88em}
           <button id="tabHeat" onclick="switchTab('heat')">資金熱力圖</button>
           <button id="tabRank" onclick="switchTab('rank')">排行榜</button>
         </div>
-        <div class="hint" id="hint">點泡泡可釘選到右側K線；按 ▶ 播放看輪動，白線會在K線上同步移動</div>
+        <div class="cright">
+          <span class="infohelp" tabindex="0">ⓘ 圖表說明<div class="infopop">
+            <h5>怎麼看這張圖</h5>
+            <b>橫軸｜近5日淨買超（億）</b>：<span class="pos">右＝資金流入</span>、<span class="neg">左＝流出</span>。<br>
+            <b>縱軸｜資金加速度（億/天）</b>：上＝買盤加速、下＝放緩。這是「速度的變化」，<b>不是方向</b>——往下只代表力道變小，<b>不等於流出</b>。<br>
+            <br><b>四象限</b><br>
+            ⭐ <b>漲潮</b>（右上）：流入且加速，最強<br>
+            <b>輪動</b>（右下）：仍在流入，但力道放緩<br>
+            <b>退潮</b>（左下）：流出且持續轉弱<br>
+            <b>觀望</b>（左上）：流出趨緩、資金沉寂<br>
+            <span class="ex">例：某板塊前一週日均買 +15 億，這週降到 +10 億 → 仍是淨買（在右邊），但加速度 −5（在下面）＝「流入但放緩」。減速 ≠ 倒車。</span>
+          </div></span>
+          <div class="hint" id="hint">點泡泡可釘選到右側K線；按 ▶ 播放看輪動，白線會在K線上同步移動</div>
+        </div>
       </div>
       <div class="stage" id="stage">
         <svg class="chart" id="svg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"></svg>
