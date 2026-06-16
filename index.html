@@ -70,7 +70,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .infopop{position:absolute;top:135%;right:0;width:340px;max-width:78vw;background:rgba(7,15,11,.98);
   border:1px solid var(--line);border-radius:12px;padding:14px 15px;box-shadow:var(--shadow);z-index:30;
   display:none;white-space:normal;color:var(--txt);font-size:13px;line-height:1.75;text-align:left;font-weight:400}
-.infohelp:hover .infopop,.infohelp:focus .infopop,.infopop:hover{display:block}
+.infohelp:hover .infopop,.infohelp:focus .infopop,.infopop:hover,.infohelp.open .infopop{display:block}
 .infopop h5{margin:0 0 6px;font-size:13px;color:var(--accent);font-weight:700}
 .infopop b{color:#fff} .infopop .pos{color:var(--in);font-weight:700} .infopop .neg{color:var(--out);font-weight:700}
 .infopop .ex{color:var(--muted);display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
@@ -161,7 +161,54 @@ table.rank{width:100%;border-collapse:collapse;font-size:.88em}
 .foot{position:absolute;bottom:8px;left:0;right:0;text-align:center;color:var(--muted2);font-size:.7em;pointer-events:none}
 
 @media(max-width:1100px){.kside{width:260px}}
-@media(max-width:900px){.kside{display:none}.sidebar{width:108px}}
+@media(max-width:900px) and (min-width:641px){.kside{width:230px}.sidebar{width:112px}}
+
+/* ===== 手機版（≤640px）：垂直捲動單欄 ===== */
+@media(max-width:640px){
+  html,body{height:auto;overflow:auto;-webkit-text-size-adjust:100%}
+  .app{height:auto;min-height:100dvh}
+  /* 頂欄：標題一行，控制項一行 */
+  .hdr{padding:10px 12px 4px;gap:8px;align-items:center}
+  .brand{flex:1;min-width:0}
+  .brand h1{font-size:1.1em} .brand .sub{display:none}
+  .hdr .right{gap:6px}
+  .hdr .search{display:none}                 /* 手機收起搜尋，改用設定/篩選 */
+  .iconbtn{height:34px;min-width:34px;padding:0 8px;font-size:.9em}
+  .rangesel button{padding:6px 10px;font-size:.82em}
+  /* 摘要：縮小可換行 */
+  .summary{padding:0 12px 8px}
+  .chipline{font-size:.78em;line-height:1.6}
+  /* 主區改直向捲動 */
+  .main{flex-direction:column;gap:10px;padding:0 12px 16px;overflow:visible}
+  /* 象限改 2×2 精簡卡 */
+  .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:auto;order:1}
+  .qcard{flex-direction:row;justify-content:space-between;padding:9px 12px;border-radius:12px}
+  .qcard .t{font-size:.82em;margin:0} .qcard .n{font-size:1.5em} .qcard .d{display:none}
+  /* 圖表卡：高度依寬度，正方形畫布剛好填滿不留白 */
+  .center{order:2;flex:none}
+  .chead{padding:10px 12px;gap:8px}
+  .tabs button{padding:7px 12px}
+  .cright{width:100%;justify-content:space-between}
+  .hint{display:none}                         /* 手機隱藏長提示，改看ⓘ說明 */
+  .infohelp{font-size:.82em;padding:5px 11px}
+  .infopop{width:300px;max-width:86vw;left:0;right:auto}
+  .stage{height:calc(100vw - 24px);min-height:300px}   /* 1:1 畫布，全寬填滿 */
+  .foot{font-size:.62em}
+  .scrollwrap{max-height:70vh}
+  /* 時間軸：可換行，拇指友善 */
+  .timeline{flex-wrap:wrap;gap:10px;padding:10px 12px}
+  .tl-mid{order:3;flex:1 1 100%}
+  .play{width:44px;height:44px}
+  input[type=range]{height:8px}
+  input[type=range]::-webkit-slider-thumb{width:20px;height:20px}
+  /* K 線移到圖表下方堆疊 */
+  .kside{display:flex;width:auto;order:3;max-height:none}
+  .kscroll{max-height:none;overflow:visible}
+  .kchart{height:130px}
+  /* 設定/彈窗 */
+  .box{padding:18px;border-radius:16px}
+  .toggle-list{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -278,7 +325,14 @@ let DATA = {"updated":"20260612","dates":["20260225","20260226","20260302","2026
 </script>
 <script>
 /* ===== config / state ===== */
-const W=1000,H=620,M={l:66,r:34,t:34,b:46},PW=W-M.l-M.r,PH=H-M.t-M.b;
+let W=1000,H=620,M={l:66,r:34,t:34,b:46},PW=W-M.l-M.r,PH=H-M.t-M.b;
+function isMobile(){return window.matchMedia('(max-width:640px)').matches;}
+function setDims(){
+  if(isMobile()){H=1000;M={l:50,r:20,t:42,b:58};}        // 手機：直式正方形畫布
+  else{H=620;M={l:66,r:34,t:34,b:46};}                    // 桌機：維持原樣
+  PW=W-M.l-M.r;PH=H-M.t-M.b;
+  var s=document.getElementById('svg');if(s)s.setAttribute('viewBox','0 0 '+W+' '+H);
+}
 const WIN=5,BASE=5,CUM=20,I0=WIN+BASE-1;
 const S={tab:'map',color:'tw',trail:6,labels:true,search:'',hidden:new Set(),pinned:new Set(),
   range:40, kmode:{}, cur:0,pos:0, playing:false,spd:1.4,raf:null,lastT:null, qfilter:null};
@@ -348,7 +402,8 @@ function buildMap(){const svg=document.getElementById('svg');svg.innerHTML='';
     const val=document.createElementNS(NS,'text');val.setAttribute('class','val');val.setAttribute('text-anchor','middle');
     g.append(trail,dot,lab,val);gb.appendChild(g);nodes[sec.sector]={g,trail,dot,lab,val};
     g.addEventListener('mousemove',e=>showTip(e,sec));g.addEventListener('mouseleave',hideTip);
-    g.addEventListener('click',()=>togglePin(sec.sector));});}
+    g.addEventListener('click',(e)=>{togglePin(sec.sector);
+      if(isMobile()){showTip(e,sec);clearTimeout(window._tipTO);window._tipTO=setTimeout(hideTip,2600);}});});}
 function updateMap(){updateMapAt(S.pos);}
 function updateMapAt(pos){const qf=S.qfilter,f=Math.floor(pos);
   DATA.sectors.forEach(sec=>{const n=nodes[sec.sector];if(!n)return;
@@ -553,6 +608,7 @@ function loadState(){try{var j=JSON.parse(localStorage.getItem('tide_state'));if
 function init(){
   loadState();
   SECID={};DATA.sectors.forEach((s,i)=>{SECID[s.sector]=i;});
+  setDims();
   computeDomain();buildMap();
   // 僅在沒有已儲存的釘選時，預設釘選近20日資金量前三大
   if(S.pinned.size===0)[...DATA.sectors].sort((a,b)=>Math.abs(cum20(b.series,LAST()))-Math.abs(cum20(a.series,LAST()))).slice(0,3).forEach(s=>S.pinned.add(s.sector));
@@ -563,7 +619,16 @@ function init(){
   setRange(S.range);                                        // 設定時間軸範圍並繪製
   window.addEventListener('beforeunload',saveState);
   setInterval(saveState,2000);
+  // 螢幕尺寸變更（含手機↔桌機切換、旋轉）時重新套用畫布尺寸與重繪
+  var _rz;window.addEventListener('resize',function(){clearTimeout(_rz);_rz=setTimeout(function(){
+    var was=H;setDims();if(H!==was){buildMap();}updateMap();updateCursors(S.pos);},180);});
 }
+// ⓘ 圖表說明：手機（無 hover）改成點一下展開、點外面收起
+document.addEventListener('click',function(e){
+  var h=document.querySelector('.infohelp');if(!h)return;
+  if(h.contains(e.target)){h.classList.toggle('open');}
+  else h.classList.remove('open');
+});
 function updatedLabel(){var e=document.getElementById('updLbl');if(e&&DATA&&DATA.updated){var d=DATA.updated;e.textContent='資料：'+d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6,8);}}
 function applyData(d){DATA=d;SECID={};DATA.sectors.forEach(function(s,i){SECID[s.sector]=i;});computeDomain();buildMap();renderToggles();renderKside();setRange(S.range);updatedLabel();}
 function boot(){fetch('data.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){DATA=d;}).catch(function(){}).then(function(){init();updatedLabel();});}
